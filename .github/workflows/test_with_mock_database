@@ -1,0 +1,42 @@
+name: Test with Mock Database
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Set up PostgreSQL
+      run: |
+        # Install PostgreSQL
+        sudo apt-get update
+        sudo apt-get install postgresql postgresql-client
+    
+        # Start PostgreSQL service
+        sudo service postgresql start
+    
+        # Create database and user (replace with your credentials)
+        sudo -u postgres psql -c "CREATE DATABASE mytestdb;"
+        sudo -u postgres psql -c "CREATE USER myuser WITH PASSWORD 'mypassword';"
+        sudo -u postgres psql -c "ALTER ROLE myuser SET client_encoding TO 'utf8';"
+        sudo -u postgres psql -c "ALTER ROLE myuser SET default_transaction_isolation TO 'read committed';"
+        sudo -u postgres psql -c "ALTER ROLE myuser SET timezone TO 'UTC';"
+        sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE mytestdb TO myuser;"
+
+    - name: Run tests
+      run: pytest  # Replace with your testing command.
