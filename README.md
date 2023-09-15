@@ -15,11 +15,11 @@ The EU Stay Tracking App is a web and mobile application designed to help users 
 - **Backend**: Built with Python using the FastAPI framework, ensuring robust API functionality.
 - **Frontend**: Developed using React for dynamic and interactive user experiences.
 - **Database**: Store user data and stay history using PostgreSQL.
-- **Deployment**: Hosted on [to be deterimned].
+<!--- **Deployment**: Hosted on [to be deterimned]. -->
 
 ## Getting Started
 
-1. Clone the repository: `git clone [repository URL]`
+1. Clone the repository.
 2. Install dependencies:
    - Backend: `cd backend && pip install -r requirements.txt`
    - Frontend: `cd frontend && npm install`
