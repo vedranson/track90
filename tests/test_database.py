@@ -42,19 +42,19 @@ def test_postgres_server_access():
 
 @pytest.mark.dependency(depends=['test_postgres_server_access'])
 def test_create_drop_databank():
-    stmt = f"DROP DATABASE IF EXISTS \"%(db_name)s\";"
+    stmt = "DROP DATABASE IF EXISTS \"%(db_name)s\";"
     try:
         execute_sql(stmt)
     except Error as e:
         pytest.fail(f"Error drop_database_if_exists: {e}")
 
-    stmt = f"CREATE DATABASE \"%(db_name)s\";"
+    stmt = "CREATE DATABASE \"%(db_name)s\";"
     try:
         execute_sql(stmt)
     except Error as e:
         pytest.fail(f"Error create_database: {e}")
 
-    stmt = f"DROP DATABASE \"%(db_name)s\";"
+    stmt = "DROP DATABASE \"%(db_name)s\";"
     try:
         execute_sql(stmt)
     except Error as e:
@@ -70,5 +70,5 @@ def execute_sql(stmt):
     )
     conn.autocommit = True
     with conn.cursor() as cursor:
-        stmt = f"DROP DATABASE IF EXISTS \"%(db_name)s\";"
+        stmt = "DROP DATABASE IF EXISTS \"%(db_name)s\";"
         cursor.execute(stmt, {'db_name': TEST_DATABASE_NAME})
