@@ -32,7 +32,9 @@ jobs:
         # Provide the password for postgres
         env:
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-        # Set health checks to wait until postgres has started
+        ports:
+          - 5432:5432
+          # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
