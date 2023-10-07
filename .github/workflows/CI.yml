@@ -20,10 +20,7 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
-    # Docker Hub image that `container-job` executes in
-    container: postgres
-
-    # Service containers to run with `build`
+    # Service containers to run with 'test'
     services:
       # Label used to access the service container
       postgres:
