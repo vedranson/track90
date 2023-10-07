@@ -60,7 +60,8 @@ jobs:
       # libpq-dev installs pg_config, which is needed for psycopg2
       - name: Install libpq-dev
         run: |
-          apt install libpq-dev
+          apt-get update
+          apt-get install libpq-dev
 
       - name: Install dependencies
         run: |
