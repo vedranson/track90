@@ -61,7 +61,7 @@ jobs:
       - name: Install libpq-dev
         run: |
           apt-get update
-          apt-get install libpq-dev
+          apt-get install -y libpq-dev
 
       - name: Install dependencies
         run: |
