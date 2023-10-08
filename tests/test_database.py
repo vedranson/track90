@@ -12,6 +12,24 @@ def test_postgres_password_in_environment():
 
 
 @pytest.mark.dependency(depends=['test_postgres_password_in_environment'])
+def test_postgres_server_access():
+    try:
+        connect(
+            host='localhost',
+            port=5432,
+            user='postgres',
+            password=os.environ.get('POSTGRES_PASSWORD'),
+        )
+    except Error as e:
+        pytest.fail(f'Server access failed {e}')
+
+
+@pytest.mark.dependency(
+    depends=[
+        'test_postgres_password_in_environment',
+        'test_postgres_server_access'
+    ]
+)
 def test_postgres_server_access_fails_when_nonexistent_user():
     with pytest.raises(OperationalError) as exc_info:
         connect(
@@ -25,19 +43,6 @@ def test_postgres_server_access_fails_when_nonexistent_user():
         'FATAL:  password authentication failed for user '
         '"the_most_likely_nonexistent_user"\n'
     )
-
-
-@pytest.mark.dependency(depends=['test_postgres_password_in_environment'])
-def test_postgres_server_access():
-    try:
-        connect(
-            host='localhost',
-            port=5432,
-            user='postgres',
-            password=os.environ.get('POSTGRES_PASSWORD'),
-        )
-    except Error as e:
-        pytest.fail(f'Server access failed {e}')
 
 
 @pytest.mark.dependency(depends=['test_postgres_server_access'])
@@ -70,5 +75,4 @@ def execute_sql(stmt):
     )
     conn.autocommit = True
     with conn.cursor() as cursor:
-        stmt = "DROP DATABASE IF EXISTS \"%(db_name)s\";"
         cursor.execute(stmt, {'db_name': TEST_DATABASE_NAME})
