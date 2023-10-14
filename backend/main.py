@@ -34,9 +34,6 @@ class DateRange:
         return self.start <= d <= self.end
 
     @staticmethod
-    def str_to_date(s: str | date | None) -> date | None:
-        if s is not None:
-            if isinstance(s, str):
     def str_to_date(d: str | date | None) -> date | None:
         if d is not None:
             if isinstance(d, str):
@@ -87,6 +84,10 @@ class StayCollection:
                     break
         else:
             pass
+    def _is_date_in(self, d: str | date) -> DateRange | None:
+        for stay in self.stays:
+            if stay.is_date_within_range(d):
+                return stay
 
     def _process(self, dates):
         for d in dates:
