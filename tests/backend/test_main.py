@@ -123,13 +123,13 @@ def test_date_range_is_date_within():
 def test_stay_collection():
     stays = StayCollection()
     assert stays.stays == []
-    assert stays._no_end_range is None
+    assert stays._endless is None
 
 
 def test_stay_collection_from_list_with_one_str_date():
     stays = StayCollection([day_str(1)])
     assert stays.stays == [DateRange(start=day(1))]
-    assert stays._no_end_range == DateRange(start=day(1))
+    assert stays._endless == DateRange(start=day(1))
 
 
 def test_stay_collection_from_list_with_two_dates():
@@ -137,7 +137,7 @@ def test_stay_collection_from_list_with_two_dates():
     assert stays.stays == [
         DateRange(start=day(1), end=day(2)),
     ]
-    assert stays._no_end_range is None
+    assert stays._endless is None
 
 
 def test_stay_collection_from_list_with_the_two_same_dates():
@@ -145,7 +145,7 @@ def test_stay_collection_from_list_with_the_two_same_dates():
     assert stays.stays == [
         DateRange(start=day(1), end=day(2)),
     ]
-    assert stays._no_end_range is None
+    assert stays._endless is None
 
 
 def test_stay_collection_from_list_with_three_dates():
@@ -154,7 +154,7 @@ def test_stay_collection_from_list_with_three_dates():
         DateRange(start=day(1), end=day(2)),
         DateRange(start=day(3))
     ]
-    assert stays._no_end_range == DateRange(start=day(3))
+    assert stays._endless == DateRange(start=day(3))
 
 
 def test_stay_collection_from_list_with_none():
@@ -168,7 +168,7 @@ def test_stay_collection_add_date():
     assert stays.stays == [
         DateRange(start=day(1)),
     ]
-    assert stays._no_end_range == DateRange(start=day(1))
+    assert stays._endless == DateRange(start=day(1))
 
 
 def test_stay_collection_add_date_as_string():
@@ -177,7 +177,7 @@ def test_stay_collection_add_date_as_string():
     assert stays.stays == [
         DateRange(start=day(1)),
     ]
-    assert stays._no_end_range == DateRange(start=day(1))
+    assert stays._endless == DateRange(start=day(1))
 
 
 def test_stay_collection_add_date_add_date():
@@ -187,7 +187,7 @@ def test_stay_collection_add_date_add_date():
     assert stays.stays == [
         DateRange(start=day(1), end=day(2)),
     ]
-    assert stays._no_end_range is None
+    assert stays._endless is None
 
 
 def test_check_action_same_start_end_outside_existing_date_range():
