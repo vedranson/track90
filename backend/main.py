@@ -12,6 +12,7 @@ class DateRange:
     """ Represents a stay with a start date and an optional end date.
         Allows arguments of type timedate.date or ISO date format string.
     """
+
     def __init__(self,
                  start: date | str,
                  end: date | str | None = None):
@@ -44,9 +45,12 @@ class StayCollection:
     """ Represents a collection of date ranges.
     """
 
-    def __init__(self):
+    def __init__(self, dates: list[str] = None):
         self.stays: list[DateRange] = []
         self.no_end_idx: int | None = None
+
+        if dates is not None:
+            self._process(dates)
 
     def add_date(self, d: date | str) -> None:
         if self.no_end_idx is None:
@@ -56,10 +60,16 @@ class StayCollection:
             self.stays[self.no_end_idx].end = DateRange.str_to_date(d)
             self.stays[self.no_end_idx].order()
             self._check_action()
-            self.no_end_idx = 0
+            self.no_end_idx = None
 
     def _check_action(self):
         pass
+
+    def _process(self, dates):
+        for d in dates:
+            if d is None:
+                raise TypeError('None instead of a date string')
+            self.add_date(d)
 
 
 @app.get('/')
