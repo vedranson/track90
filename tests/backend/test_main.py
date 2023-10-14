@@ -92,7 +92,7 @@ def test_stay_collection_add_date_add_date():
     assert stays.stays == [
         DateRange(date(year=3333, month=11, day=22), date(year=4444, month=11, day=22))
     ]
-    assert stays.no_end_idx is None
+    assert stays.no_end_idx == 0
 
 
 def test_check_action_same_start_end_outside_existing_date_range():
