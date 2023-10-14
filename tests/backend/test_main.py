@@ -7,6 +7,14 @@ from backend.main import app, DateRange, StayCollection
 client = TestClient(app)
 
 
+def day(d):
+    return date(year=1, month=1, day=d)
+
+
+def day_str(d):
+    return str(date(year=1, month=1, day=d))
+
+
 def test_root():
     response = client.get('/')
     assert response.status_code == 200
@@ -14,145 +22,163 @@ def test_root():
 
 
 def test_date_range_init():
-    date_range = DateRange(start=date(year=3333, month=11, day=22))
-    assert date_range.start == date(year=3333, month=11, day=22)
+    date_range = DateRange(start=day(1))
+    assert date_range.start == day(1)
     assert date_range.end is None
 
 
-def test_date_range_init_date_type_arguments():
-    date_range = DateRange(start=date(year=3333, month=11, day=22),
-                           end=date(year=3333, month=11, day=22))
-    assert date_range.start == date(year=3333, month=11, day=22)
-    assert date_range.end == date(year=3333, month=11, day=22)
-
-
 def test_date_range_str_to_date():
-    assert DateRange.str_to_date('3333-11-22') == date(year=3333, month=11, day=22)
+    assert DateRange.str_to_date(day_str(1)) == day(1)
 
 
-def test_date_range_init_str_type_arguments():
-    date_range = DateRange(start='3333-11-22', end='3333-11-22')
-    assert date_range.start == date(year=3333, month=11, day=22)
-    assert date_range.end == date(year=3333, month=11, day=22)
+def test_date_range_init_date_type_arguments():
+    """ The DateRange constructor takes datetime.date or string type arguments.
+        The instance start and end attributes get datetime.date type.
+    """
+    date_range = DateRange(start=day(1), end=day(2))
+    assert date_range.start == day(1)
+    assert date_range.end == day(2)
+
+    date_range = DateRange(start=day_str(1), end=day_str(2))
+    assert date_range.start == day(1)
+    assert date_range.end == day(2)
+
+    date_range = DateRange(start=day(1), end=day_str(2))
+    assert date_range.start == day(1)
+    assert date_range.end == day(2)
+
+    date_range = DateRange(start=day_str(1), end=day(2))
+    assert date_range.start == day(1)
+    assert date_range.end == day(2)
 
 
 def test_date_range_str_to_date_fails_when_invalid_date():
     with pytest.raises(ValueError,
-                       match="time data '3333-00-00' "
+                       match="time data '1111-00-00' "
                              "does not match format '%Y-%m-%d'"):
-        DateRange.str_to_date('3333-00-00')
+        DateRange.str_to_date('1111-00-00')
     with pytest.raises(ValueError,
                        match="day is out of range for month"):
-        DateRange.str_to_date('3333-02-29')
+        DateRange.str_to_date('1111-02-29')
 
 
 def test_date_range__eq__():
-    assert DateRange(start='3333-11-22') == DateRange(start='3333-11-22')
-    assert DateRange(start='3333-11-22') == DateRange(start='3333-11-22', end=None)
-    assert not (DateRange(start='3333-11-22') == DateRange(start='4444-11-22'))
-    assert not (DateRange(start='3333-11-22', end='4444-11-12') ==
-                DateRange(start='4444-11-22'))
+    assert DateRange(start=day(1)) == DateRange(start=day(1))
+    assert DateRange(start=day(1)) == DateRange(start=day(1), end=None)
+    assert not (DateRange(start=day(1)) == DateRange(day(2)))
+    assert not (DateRange(start=day(1), end=day(2)) == DateRange(start=day(1)))
 
 
 def test_date_range_order_start_before_end():
-    date_range = DateRange(start='3333-11-22', end='4444-11-22')
+    """ If start and end are already ordered, change neither.
+    """
+    date_range = DateRange(start=day(1), end=day(2))
     date_range.order()
-    assert date_range.start == date(year=3333, month=11, day=22)
-    assert date_range.end == date(year=4444, month=11, day=22)
+    assert date_range.start == day(1)
+    assert date_range.end == day(2)
 
 
 def test_date_range_order_end_before_start():
-    date_range = DateRange(start='4444-11-22', end='3333-11-22')
+    """ If end is later than start, switch the two.
+    """
+    date_range = DateRange(start=day(2), end=day(1))
     date_range.order()
-    assert date_range.start == date(year=3333, month=11, day=22)
-    assert date_range.end == date(year=4444, month=11, day=22)
+    assert date_range.start == day(1)
+    assert date_range.end == day(2)
 
 
 def test_date_range_order_same_dates():
-    date_range = DateRange(start='2222-11-22', end='2222-11-22')
+    """ If start and end are the same, change neither.
+    """
+    date_range = DateRange(start=day(1), end=day(1))
     date_range.order()
-    assert date_range.start == date(year=2222, month=11, day=22)
-    assert date_range.end == date(year=2222, month=11, day=22)
+    assert date_range.start == day(1)
+    assert date_range.end == day(1)
 
 
 def test_date_range_when_end_is_none():
-    date_range = DateRange(start='3333-11-22')
+    date_range = DateRange(start=day(1))
     with pytest.raises(TypeError, match='Cannot order dates if end date is None'):
         date_range.order()
 
 
 def test_date_range_are_start_end_same():
-    date_range = DateRange(start='2222-11-22')
+    date_range = DateRange(start=day(1))
     assert date_range.are_start_end_same() is False
-    date_range = DateRange(start='2222-11-22', end='2222-11-23')
+    date_range = DateRange(start=day(1), end=day(2))
     assert date_range.are_start_end_same() is False
-    date_range = DateRange(start='2222-11-22', end='2222-11-22')
+    date_range = DateRange(start=day(1), end=day(1))
     assert date_range.are_start_end_same() is True
 
 
 def test_stay_collection():
     stays = StayCollection()
     assert stays.stays == []
-    assert stays.no_end_idx is None
+    assert stays._no_end_range is None
 
 
 def test_stay_collection_from_list_with_one_str_date():
-    stays = StayCollection(['1111-11-22'])
-    assert stays.stays == [DateRange(start=date(year=1111, month=11, day=22))]
-    assert stays.no_end_idx == 0
+    stays = StayCollection([day_str(1)])
+    assert stays.stays == [DateRange(start=day(1))]
+    assert stays._no_end_range == DateRange(start=day(1))
 
 
 def test_stay_collection_from_list_with_two_dates():
-    stays = StayCollection(['1111-11-22', '2222-11-22'])
+    stays = StayCollection([day_str(1), day(2)])
     assert stays.stays == [
-        DateRange(start=date(year=1111, month=11, day=22),
-                  end=date(year=2222, month=11, day=22)),
+        DateRange(start=day(1), end=day(2)),
     ]
-    assert stays.no_end_idx is None
+    assert stays._no_end_range is None
 
 
 def test_stay_collection_from_list_with_the_two_same_dates():
-    stays = StayCollection(['2222-11-22', '2222-11-22'])
+    stays = StayCollection([day_str(1), day_str(2)])
     assert stays.stays == [
-        DateRange(start=date(year=2222, month=11, day=22),
-                  end=date(year=2222, month=11, day=22)),
+        DateRange(start=day(1), end=day(2)),
     ]
-    assert stays.no_end_idx is None
+    assert stays._no_end_range is None
 
 
 def test_stay_collection_from_list_with_three_dates():
-    stays = StayCollection(['1111-11-22', '2222-11-22', '3333-11-22'])
+    stays = StayCollection([day_str(1), day_str(2), day_str(3)])
     assert stays.stays == [
-        DateRange(start=date(year=1111, month=11, day=22),
-                  end=date(year=2222, month=11, day=22)),
-        DateRange(start=date(year=3333, month=11, day=22))
+        DateRange(start=day(1), end=day(2)),
+        DateRange(start=day(3))
     ]
-    assert stays.no_end_idx == 1
+    assert stays._no_end_range == DateRange(start=day(3))
 
 
 def test_stay_collection_from_list_with_none():
     with pytest.raises(TypeError, match='None instead of a date string'):
-        StayCollection(['1111-11-22', None, '3333-11-22'])
+        StayCollection([day_str(1), None, day(2)])
 
 
 def test_stay_collection_add_date():
     stays = StayCollection()
-    stays.add_date(date(year=3333, month=11, day=22))
-    assert stays.stays == [DateRange(start=date(year=3333, month=11, day=22))]
-    assert stays.no_end_idx == 0
-    assert (stays.stays[stays.no_end_idx] ==
-            DateRange(start=date(year=3333, month=11, day=22)))
+    stays.add_date(day(1))
+    assert stays.stays == [
+        DateRange(start=day(1)),
+    ]
+    assert stays._no_end_range == DateRange(start=day(1))
+
+
+def test_stay_collection_add_date_as_string():
+    stays = StayCollection()
+    stays.add_date(day_str(1))
+    assert stays.stays == [
+        DateRange(start=day(1)),
+    ]
+    assert stays._no_end_range == DateRange(start=day(1))
 
 
 def test_stay_collection_add_date_add_date():
     stays = StayCollection()
-    stays.add_date(date(year=3333, month=11, day=22))
-    stays.add_date(date(year=4444, month=11, day=22))
+    stays.add_date(day(1))
+    stays.add_date(day(2))
     assert stays.stays == [
-        DateRange(start=date(year=3333, month=11, day=22),
-                  end=date(year=4444, month=11, day=22)),
+        DateRange(start=day(1), end=day(2)),
     ]
-    assert stays.no_end_idx is None
+    assert stays._no_end_range is None
 
 
 def test_check_action_same_start_end_outside_existing_date_range():
