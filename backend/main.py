@@ -1,5 +1,6 @@
 from time import strptime
-from datetime import date
+from datetime import date, timedelta
+from operator import itemgetter
 
 from fastapi import FastAPI
 
@@ -85,6 +86,25 @@ class StayCollection:
             if d is None:
                 raise TypeError('None instead of a date string')
             self.add_date(d)
+
+    def _merge(self, new: DateRange):
+        if not self.stays:
+            self.stays.append(new)
+            return
+        stays = sorted([(stay.start, stay.end) for stay in self.stays],
+                       key=itemgetter(0))
+        merged = []
+        i = 0
+        start, end = stays[i]
+        for i in range(1, len(stays)):
+            next_stay = stays[i]
+            if end + timedelta(days=1) >= next_stay[0]:
+                end = max(end, next_stay[1])
+            else:
+                merged.append(DateRange(start, end))
+                start, end = next_stay
+        merged.append(DateRange(start, end))
+        self.stays = merged
 
 
 @app.get('/')

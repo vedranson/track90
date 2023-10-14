@@ -159,16 +159,15 @@ def test_check_action_same_start_end_outside_existing_date_range():
     """ When the new date range
         has the same start and end and,
         it does not intersect with any other data range
-        take no action, the new date range remains as it is.
+        just add the new date range.
+
     """
-    stays = StayCollection(['2222-11-22', '2222-11-22'])
-    stays.add_date('2222-11-25')
-    stays.add_date('2222-11-25')
+    stays = StayCollection([day_str(1), day_str(2)])
+    stays.add_date(day(4))
+    stays.add_date(day(4))
     assert stays.stays == [
-        DateRange(start=date(year=2222, month=11, day=22),
-                  end=date(year=2222, month=11, day=22)),
-        DateRange(start=date(year=2222, month=11, day=25),
-                  end=date(year=2222, month=11, day=25)),
+        DateRange(start=day(1), end=day(2)),
+        DateRange(start=day(4), end=day(4)),
     ]
 
 
@@ -178,16 +177,125 @@ def test_check_action_same_start_end_inside_existing_date_range():
         that start/end is contained in an existing data range
         remove both the new and the existing data range.
     """
-    stays = StayCollection(['2222-11-22', '2222-11-24'])
-    stays.add_date('2222-11-23')
-    stays.add_date('2222-11-23')
+    stays = StayCollection([
+        day_str(1), day_str(3),
+    ])
+    stays.add_date(day(2))
+    stays.add_date(day(2))
     assert stays.stays == []
 
+    stays = StayCollection([
+        day_str(1), day_str(2), day_str(4), day_str(5),
+    ])
+    stays.add_date(day(1))
+    stays.add_date(day(1))
+    assert stays.stays == [
+        DateRange(start=day(4), end=day(5)),
+    ]
 
-def test_check_action_no_intersection():
+    stays = StayCollection([
+        day_str(1), day_str(2), day_str(4), day_str(5), day_str(7), day_str(8)
+    ])
+    stays.add_date(day(4))
+    stays.add_date(day(4))
+    assert stays.stays == [
+        DateRange(start=day(1), end=day(2)),
+        DateRange(start=day(7), end=day(8)),
+    ]
+
+
+def test_check_action_without_intersection():
     """ When the new date range
         has different start and end and,
-        does not intersect with any other data range
-        take no action.
+        it does not intersect with any other data range
+        just add the new date range.
     """
-    pass
+    stays = StayCollection([
+        day_str(1), day_str(2)
+    ])
+    stays.add_date(day(4))
+    stays.add_date(day(4))
+    assert stays.stays == [
+        DateRange(start=day(1), end=day(2)),
+        DateRange(start=day(4), end=day(4)),
+    ]
+
+
+def test_check_action_without_intersection_next_to_existing():
+    """ When the new date range
+        has different start and end and,
+        it does not intersect with any other date range,
+        but it's next to an existing date range
+        add the new date range, and merge it with its neighbour(s).
+    """
+    stays = StayCollection([
+        day_str(1), day_str(2),
+    ])
+    stays.add_date(day(3))
+    stays.add_date(day(4))
+    assert stays.stays == [
+        DateRange(start=day(1), end=day(4)),
+    ]
+
+    stays = StayCollection([
+        day_str(3), day_str(4),
+    ])
+    stays.add_date(day(1))
+    stays.add_date(day(2))
+    assert stays.stays == [
+        DateRange(start=day(1), end=day(4)),
+    ]
+
+    stays = StayCollection([
+        day_str(1), day_str(2), day_str(5), day_str(6), day_str(9), day_str(10),
+    ])
+    stays.add_date(day(3))
+    stays.add_date(day(3))
+    assert stays.stays == [
+        DateRange(start=day(1), end=day(3)),
+        DateRange(start=day(5), end=day(6)),
+        DateRange(start=day(9), end=day(10)),
+    ]
+    stays.add_date(day(4))
+    stays.add_date(day(4))
+    assert stays.stays == [
+        DateRange(start=day(1), end=day(6)),
+        DateRange(start=day(9), end=day(10)),
+    ]
+    stays.add_date(day(7))
+    stays.add_date(day(8))
+    assert stays.stays == [
+        DateRange(start=day(1), end=day(10)),
+    ]
+
+
+def test_check_action_with_intersection():
+    """ When the new date range
+        has different start and end and,
+        either of them intersects with any other date range,
+        add the new date range, and merge any intersecting date range.
+    """
+    stays = StayCollection([
+        day_str(4), day_str(5),
+    ])
+    stays.add_date(day(4))
+    stays.add_date(day(6))
+    assert stays.stays == [
+        DateRange(start=day(4), end=day(6)),
+    ]
+    stays.add_date(day(6))
+    stays.add_date(day(7))
+    assert stays.stays == [
+        DateRange(start=day(4), end=day(7)),
+    ]
+    stays.add_date(day(10))
+    stays.add_date(day(11))
+    assert stays.stays == [
+        DateRange(start=day(4), end=day(7)),
+        DateRange(start=day(10), end=day(11)),
+    ]
+    stays.add_date(day(1))
+    stays.add_date(day(12))
+    assert stays.stays == [
+        DateRange(start=day(1), end=day(12)),
+    ]
