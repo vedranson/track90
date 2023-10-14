@@ -72,7 +72,13 @@ class StayCollection:
         self.no_end_idx = len(self.stays) - 1
 
     def _check_action(self, dr: DateRange):
-        pass
+        if dr.are_start_end_same():
+            for stay in self.stays:
+                if stay.start <= dr.start <= stay.end:
+                    # remove both
+                    break
+        else:
+            pass
 
     def _process(self, dates):
         for d in dates:
