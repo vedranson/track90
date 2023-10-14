@@ -43,7 +43,7 @@ class DateRange:
                     raise e
                 return \
                     date(year=a_date.tm_year, month=a_date.tm_mon, day=a_date.tm_mday)
-            return s
+            return d
 
     def __eq__(self, other):
         return other is not None and self.start == other.start and self.end == other.end
@@ -55,35 +55,36 @@ class StayCollection:
 
     def __init__(self, dates: list[str] = None):
         self.stays: list[DateRange] = []
-        self.no_end_idx: int | None = None
+        self._no_end_range: DateRange | None = None
 
         if dates is not None:
             self._process(dates)
 
     def add_date(self, d: date | str) -> None:
-        if self.no_end_idx is None:
+        if self._no_end_range is None:
             self._add_no_end_date_range(d)
         else:
             self._update_no_end_date_range(d)
 
     def _update_no_end_date_range(self, d):
-        self.stays[self.no_end_idx].end = DateRange.str_to_date(d)
-        self.stays[self.no_end_idx].order()
-        self._check_action(self.stays[self.no_end_idx])
-        self.no_end_idx = None
+        self.stays.remove(self._no_end_range)
+        self._no_end_range.end = DateRange.str_to_date(d)
+        self._no_end_range.order()
+        self._check_action(self._no_end_range)
+        self._no_end_range = None
 
     def _add_no_end_date_range(self, d):
-        self.stays.append(DateRange(start=d))
-        self.no_end_idx = len(self.stays) - 1
+        self._no_end_range = DateRange(start=d)
+        self.stays.append(self._no_end_range)
 
-    def _check_action(self, dr: DateRange):
-        if dr.are_start_end_same():
-            for stay in self.stays:
-                if stay.start <= dr.start <= stay.end:
-                    # remove both
-                    break
+    def _check_action(self, new_date_range: DateRange):
+        if new_date_range.are_start_end_same() and \
+                (stay := self._is_date_in(new_date_range.start)):
+            self.stays.remove(stay)
         else:
-            pass
+            self.stays.append(new_date_range)
+            self._merge()
+
     def _is_date_in(self, d: str | date) -> DateRange | None:
         for stay in self.stays:
             if stay.is_date_within_range(d):
@@ -95,10 +96,7 @@ class StayCollection:
                 raise TypeError('None instead of a date string')
             self.add_date(d)
 
-    def _merge(self, new: DateRange):
-        if not self.stays:
-            self.stays.append(new)
-            return
+    def _merge(self):
         stays = sorted([(stay.start, stay.end) for stay in self.stays],
                        key=itemgetter(0))
         merged = []
