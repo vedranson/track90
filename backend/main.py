@@ -25,6 +25,9 @@ class DateRange:
         if self.end < self.start:
             self.start, self.end = self.end, self.start
 
+    def are_start_end_same(self):
+        return self.end is not None and self.start == self.end
+
     @staticmethod
     def str_to_date(s: str | date | None) -> date | None:
         if s is not None:
