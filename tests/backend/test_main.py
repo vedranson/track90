@@ -68,10 +68,26 @@ def test_date_range_order_end_before_start():
     assert date_range.end == date(year=4444, month=11, day=22)
 
 
+def test_date_range_order_same_dates():
+    date_range = DateRange(start='2222-11-22', end='2222-11-22')
+    date_range.order()
+    assert date_range.start == date(year=2222, month=11, day=22)
+    assert date_range.end == date(year=2222, month=11, day=22)
+
+
 def test_date_range_when_end_is_none():
     date_range = DateRange(start='3333-11-22')
     with pytest.raises(TypeError, match='Cannot order dates if end date is None'):
         date_range.order()
+
+
+def test_date_range_are_start_end_same():
+    date_range = DateRange(start='2222-11-22')
+    assert date_range.are_start_end_same() is False
+    date_range = DateRange(start='2222-11-22', end='2222-11-23')
+    assert date_range.are_start_end_same() is False
+    date_range = DateRange(start='2222-11-22', end='2222-11-22')
+    assert date_range.are_start_end_same() is True
 
 
 def test_stay_collection():
@@ -90,6 +106,15 @@ def test_stay_collection_from_list_with_two_dates():
     stays = StayCollection(['1111-11-22', '2222-11-22'])
     assert stays.stays == [
         DateRange(start=date(year=1111, month=11, day=22),
+                  end=date(year=2222, month=11, day=22)),
+    ]
+    assert stays.no_end_idx is None
+
+
+def test_stay_collection_from_list_with_the_two_same_dates():
+    stays = StayCollection(['2222-11-22', '2222-11-22'])
+    assert stays.stays == [
+        DateRange(start=date(year=2222, month=11, day=22),
                   end=date(year=2222, month=11, day=22)),
     ]
     assert stays.no_end_idx is None
