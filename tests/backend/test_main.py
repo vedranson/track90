@@ -161,7 +161,15 @@ def test_check_action_same_start_end_outside_existing_date_range():
         it does not intersect with any other data range
         take no action, the new date range remains as it is.
     """
-    pass
+    stays = StayCollection(['2222-11-22', '2222-11-22'])
+    stays.add_date('2222-11-25')
+    stays.add_date('2222-11-25')
+    assert stays.stays == [
+        DateRange(start=date(year=2222, month=11, day=22),
+                  end=date(year=2222, month=11, day=22)),
+        DateRange(start=date(year=2222, month=11, day=25),
+                  end=date(year=2222, month=11, day=25)),
+    ]
 
 
 def test_check_action_same_start_end_inside_existing_date_range():
@@ -170,7 +178,15 @@ def test_check_action_same_start_end_inside_existing_date_range():
         that start/end is contained in an existing data range
         remove both the new and the existing data range.
     """
-    pass
+    stays = StayCollection(['2222-11-22', '2222-11-22'])
+    stays.add_date('2222-11-25')
+    stays.add_date('2222-11-25')
+    assert stays.stays == [
+        DateRange(start=date(year=2222, month=11, day=22),
+                  end=date(year=2222, month=11, day=24)),
+        DateRange(start=date(year=2222, month=11, day=23),
+                  end=date(year=2222, month=11, day=23)),
+    ]
 
 
 def test_check_action_no_intersection():
