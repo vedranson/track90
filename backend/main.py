@@ -40,6 +40,28 @@ class DateRange:
         return other is not None and self.start == other.start and self.end == other.end
 
 
+class StayCollection:
+    """ Represents a collection of date ranges.
+    """
+
+    def __init__(self):
+        self.stays: list[DateRange] = []
+        self.no_end_idx: int | None = None
+
+    def add_date(self, d: date | str) -> None:
+        if self.no_end_idx is None:
+            self.stays.append(DateRange(start=d))
+            self.no_end_idx = len(self.stays) - 1
+        else:
+            self.stays[self.no_end_idx].end = DateRange.str_to_date(d)
+            self.stays[self.no_end_idx].order()
+            self._check_action()
+            self.no_end_idx = 0
+
+    def _check_action(self):
+        pass
+
+
 @app.get('/')
 async def root():
     return {'message': 'root'}

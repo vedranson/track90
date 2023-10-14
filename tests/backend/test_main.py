@@ -2,7 +2,7 @@ from datetime import date
 
 import pytest
 from fastapi.testclient import TestClient
-from app.main import app
+from backend.main import app, DateRange, StayCollection
 
 client = TestClient(app)
 
@@ -69,3 +69,54 @@ def test_date_range_when_end_is_none():
     date_range = DateRange('3333-11-22')
     with pytest.raises(TypeError, match='Cannot order dates if end date is None'):
         date_range.order()
+
+
+def test_stay_collection():
+    stays = StayCollection()
+    assert stays.stays == []
+    assert stays.no_end_idx is None
+
+
+def test_stay_collection_add_date():
+    stays = StayCollection()
+    stays.add_date(date(year=3333, month=11, day=22))
+    assert stays.stays == [DateRange(date(year=3333, month=11, day=22))]
+    assert stays.no_end_idx == 0
+    assert stays.stays[stays.no_end_idx] == DateRange(date(year=3333, month=11, day=22))
+
+
+def test_stay_collection_add_date_add_date():
+    stays = StayCollection()
+    stays.add_date(date(year=3333, month=11, day=22))
+    stays.add_date(date(year=4444, month=11, day=22))
+    assert stays.stays == [
+        DateRange(date(year=3333, month=11, day=22), date(year=4444, month=11, day=22))
+    ]
+    assert stays.no_end_idx is None
+
+
+def test_check_action_same_start_end_outside_existing_date_range():
+    """ When the new date range
+        has the same start and end and,
+        it does not intersect with any other data range
+        take no action.
+    """
+    pass
+
+
+def test_check_action_same_start_end_inside_existing_date_range():
+    """ When the new date range
+        has the same start and end and,
+        that start/end is contained in an existing data range
+        remove both the new and the existing data range.
+    """
+    pass
+
+
+def test_check_action_no_intersection():
+    """ When the new date range
+        has different start and end and,
+        does not intersect with any other data range
+        take no action.
+    """
+    pass
