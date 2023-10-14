@@ -111,6 +111,15 @@ def test_date_range_are_start_end_same():
     assert date_range.are_start_end_same() is True
 
 
+def test_date_range_is_date_within():
+    date_range = DateRange(start=day(2), end=day(4))
+    assert date_range.is_date_within_range(day(1)) is False
+    assert date_range.is_date_within_range(day(2)) is True
+    assert date_range.is_date_within_range(day(3)) is True
+    assert date_range.is_date_within_range(day(4)) is True
+    assert date_range.is_date_within_range(day(5)) is False
+
+
 def test_stay_collection():
     stays = StayCollection()
     assert stays.stays == []
