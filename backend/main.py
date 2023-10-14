@@ -54,15 +54,21 @@ class StayCollection:
 
     def add_date(self, d: date | str) -> None:
         if self.no_end_idx is None:
-            self.stays.append(DateRange(start=d))
-            self.no_end_idx = len(self.stays) - 1
+            self._add_no_end_date_range(d)
         else:
-            self.stays[self.no_end_idx].end = DateRange.str_to_date(d)
-            self.stays[self.no_end_idx].order()
-            self._check_action()
-            self.no_end_idx = None
+            self._update_no_end_date_range(d)
 
-    def _check_action(self):
+    def _update_no_end_date_range(self, d):
+        self.stays[self.no_end_idx].end = DateRange.str_to_date(d)
+        self.stays[self.no_end_idx].order()
+        self._check_action(self.stays[self.no_end_idx])
+        self.no_end_idx = None
+
+    def _add_no_end_date_range(self, d):
+        self.stays.append(DateRange(start=d))
+        self.no_end_idx = len(self.stays) - 1
+
+    def _check_action(self, dr: DateRange):
         pass
 
     def _process(self, dates):
