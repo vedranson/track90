@@ -26,7 +26,7 @@ class DateRange:
         if self.end < self.start:
             self.start, self.end = self.end, self.start
 
-    def are_start_end_same(self):
+    def are_start_end_same(self) -> bool:
         return self.end is not None and self.start == self.end
 
     def is_date_within_range(self, d: date | str) -> bool:
@@ -37,8 +37,11 @@ class DateRange:
     def str_to_date(s: str | date | None) -> date | None:
         if s is not None:
             if isinstance(s, str):
+    def str_to_date(d: str | date | None) -> date | None:
+        if d is not None:
+            if isinstance(d, str):
                 try:
-                    a_date = strptime(s, ISO_DATE_FORMAT)
+                    a_date = strptime(d, ISO_DATE_FORMAT)
                 except Exception as e:
                     raise e
                 return \
