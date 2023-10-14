@@ -1,4 +1,5 @@
 pytest~=7.4.2
 pytest-dependency~=0.5.1
+pytest-cov~=4.1.0
 ruff~=0.0.292
 httpx~=0.25.0
