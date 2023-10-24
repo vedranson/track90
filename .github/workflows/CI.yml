@@ -78,4 +78,4 @@ jobs:
 
       - name: Test backend
         run: |
-          pytest backend/tests/backend/test_main.py
+          pytest backend/tests/test_main.py
