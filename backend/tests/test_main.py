@@ -2,7 +2,7 @@ from datetime import date
 
 import pytest
 from fastapi.testclient import TestClient
-from backend.main import app, DateRange, StayCollection
+from backend.src.main import app, DateRange, StayCollection
 
 client = TestClient(app)
 

@@ -64,8 +64,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
-          pip install -r requirements-dev.txt
+          pip install -r backend/requirements.txt
+          pip install -r backend/requirements-dev.txt
 
       - name: Run linter
         uses: chartboost/ruff-action@v1
@@ -74,8 +74,8 @@ jobs:
         env:
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         run: |
-          pytest tests/test_database.py
+          pytest backend/tests/test_database.py
 
       - name: Test backend
         run: |
-          pytest tests/backend/test_main.py
+          pytest backend/tests/backend/test_main.py
